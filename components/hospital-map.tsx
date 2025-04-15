@@ -1,12 +1,23 @@
 "use client"
 
-import { useEffect, useState, useRef } from "react"
+import { useEffect, useState } from "react"
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet"
 import "leaflet/dist/leaflet.css"
 import type { Hospital } from "@/lib/types"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ExternalLink, Phone } from "lucide-react"
 import L from "leaflet"
+
+// Fix for Leaflet marker icons in Next.js
+const icon = L.icon({
+  iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png",
+  iconRetinaUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png",
+  shadowUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png",
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41],
+})
 
 interface MapCenterProps {
   center: [number, number]
@@ -32,21 +43,10 @@ interface HospitalMapProps {
 export default function HospitalMap({ hospitals, city, selectedHospital, onSelectHospital }: HospitalMapProps) {
   const [mapCenter, setMapCenter] = useState<[number, number]>([51.505, -0.09])
   const [mapZoom, setMapZoom] = useState(12)
-  const leafletInitialized = useRef(false)
+  const [isClient, setIsClient] = useState(false)
 
   useEffect(() => {
-    if (!leafletInitialized.current) {
-      // This is needed to fix the marker icon issue with Leaflet in Next.js
-      delete (L.Icon.Default.prototype as any)._getIconUrl
-
-      L.Icon.Default.mergeOptions({
-        iconRetinaUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png",
-        iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png",
-        shadowUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png",
-      })
-
-      leafletInitialized.current = true
-    }
+    setIsClient(true)
   }, [])
 
   useEffect(() => {
@@ -62,6 +62,19 @@ export default function HospitalMap({ hospitals, city, selectedHospital, onSelec
       setMapZoom(15)
     }
   }, [selectedHospital])
+
+  if (!isClient) {
+    return (
+      <Card className="w-full h-[500px]">
+        <CardHeader className="pb-2">
+          <CardTitle>Loading Map...</CardTitle>
+        </CardHeader>
+        <CardContent className="p-0 h-[440px] flex items-center justify-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gray-900"></div>
+        </CardContent>
+      </Card>
+    )
+  }
 
   return (
     <Card className="w-full h-[500px]">
@@ -85,6 +98,7 @@ export default function HospitalMap({ hospitals, city, selectedHospital, onSelec
             <Marker
               key={hospital.id}
               position={[hospital.latitude, hospital.longitude]}
+              icon={icon}
               eventHandlers={{
                 click: () => onSelectHospital(hospital),
               }}

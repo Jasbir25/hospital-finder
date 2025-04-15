@@ -2,10 +2,20 @@
 
 import { useState } from "react"
 import SearchForm from "@/components/search-form"
-import HospitalMap from "@/components/hospital-map"
 import HospitalList from "@/components/hospital-list"
 import type { Hospital } from "@/lib/types"
 import { searchHospitals } from "@/lib/actions"
+import dynamic from "next/dynamic"
+
+// Dynamically import HospitalMap with no SSR
+const HospitalMap = dynamic(() => import("@/components/hospital-map"), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full h-[500px] flex items-center justify-center">
+      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gray-900"></div>
+    </div>
+  ),
+})
 
 export default function Home() {
   const [hospitals, setHospitals] = useState<Hospital[]>([])

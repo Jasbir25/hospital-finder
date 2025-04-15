@@ -26,7 +26,7 @@ export default function HospitalList({ hospitals, city, selectedHospital, onSele
 
   const downloadCSV = () => {
     // Create CSV content
-    const headers = ["Name", "Address", "Phone", "Website", "Latitude", "Longitude"]
+    const headers = ["Name", "Address", "Phone", "Website", "Latitude", "Longitude", "Revenue"]
     const csvRows = [
       headers.join(","),
       ...hospitals.map((hospital) =>
@@ -37,6 +37,7 @@ export default function HospitalList({ hospitals, city, selectedHospital, onSele
           `"${hospital.website || ""}"`,
           hospital.latitude,
           hospital.longitude,
+          `"${hospital.revenue || "Not available"}"`,
         ].join(","),
       ),
     ]
@@ -77,9 +78,8 @@ export default function HospitalList({ hospitals, city, selectedHospital, onSele
             filteredHospitals.map((hospital) => (
               <div
                 key={hospital.id}
-                className={`p-3 rounded-md cursor-pointer transition-colors ${
-                  selectedHospital?.id === hospital.id ? "bg-primary/10 border border-primary/20" : "hover:bg-muted"
-                }`}
+                className={`p-3 rounded-md cursor-pointer transition-colors ${selectedHospital?.id === hospital.id ? "bg-primary/10 border border-primary/20" : "hover:bg-muted"
+                  }`}
                 onClick={() => onSelectHospital(hospital)}
               >
                 <h3 className="font-medium">{hospital.name}</h3>
